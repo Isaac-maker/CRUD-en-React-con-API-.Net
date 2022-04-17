@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import constants from "../utilities/contants";
 
-export default function CreateForm(props) {
+export default function UpdateForm(props) {
 
   const initialFormData = Object.freeze({
-    title: "Post i",
-    content: "Hola a todos!",
+    title: (props.post.title),
+    content: props.post.content,
   });
   
   const [formData, setFormData] = useState(initialFormData);
@@ -22,20 +22,20 @@ export default function CreateForm(props) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const postToCreate = {
-      id: 0,
+    const postToUpdate = {
+      id: props.post.id,
       title: formData.title,
       content: formData.content,
     };
 
-    const url = constants.API_CREATE_POSTS;
+    const url = constants.API_UPDATE_POSTS;
 
     fetch(url, {
-      method: "POST",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(postToCreate),
+      body: JSON.stringify(postToUpdate),
     })
       .then((response) => response.json())
       .then((responseFromserver) => {
@@ -46,13 +46,13 @@ export default function CreateForm(props) {
         alert(error);
       });
 
-    props.onPostCreated(postToCreate);
+    props.onPostUpdate(postToUpdate);
   };
 
   return (
     <div>
       <form className="w-100 px-5">
-        <h1 className="mt-5">Crear nuevo post</h1>
+        <h1 className="mt-5">Actualizar el  post "{props.post.title}".</h1>
 
         <div className="mt-5">
           <label className="h3 form-label">Titulo</label>
@@ -83,7 +83,7 @@ export default function CreateForm(props) {
           Enviar
         </button>
         <button
-          onClick={() => props.onPostCreated(null)}
+          onClick={() => props.onPostUpdate(null)}
           className="btn btn-danger btn-lg w-100 mt-3"
         >
           Cancelar

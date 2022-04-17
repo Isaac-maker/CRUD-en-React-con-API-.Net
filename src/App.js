@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 import contants from "./utilities/contants";
 import CreateForm from "./Components/createForm";
+import UpdateForm from "./Components/updateForm"
+import { ButtonGroup } from 'react-bootstrap';
+import './App.css';
 
 export default function App() {
   const [posts, setPosts] = useState([]);
   const [showCreatePost, setshowCreatePost] = useState(false);
+  const [showUpdatePost, setshowUpdatePost] = useState(null);
 
   function getPosts() {
     const url = contants.API_GET_ALL_POSTS;
@@ -23,10 +27,11 @@ export default function App() {
   }
 
   return (
+    <div className="area">
     <div className="container">
       <div className="row min-vh-100">
         <div className="col d-flex flex-column justify-content-center align-items-center">
-          {showCreatePost === false && (
+          {(showCreatePost === false && showUpdatePost === null) && (
             <div>
               <h1>Crud</h1>
               <div className="mt-5">
@@ -46,18 +51,21 @@ export default function App() {
             </div>
           )}
 
-          {posts.length > 0 && showCreatePost === false && renderPostTble()}
+          {(posts.length > 0 && showCreatePost === false && showUpdatePost === null) && renderPostTble()}
 
           {showCreatePost && < CreateForm onPostCreated={onPostCreated} />}
+
+          {showUpdatePost !== null && <UpdateForm post={showUpdatePost} onPostUpdate={onPostUpdate}/>}
         </div>
       </div>
+    </div>
     </div>
   );
 
   function renderPostTble() {
     return (
       <div className="table-responsive mt-5">
-        <table className="table table-bordered border-success">
+        <table className="table table-bordered table-dark">
           <thead>
             <tr>
               <th scope="col">Id</th>
@@ -73,12 +81,14 @@ export default function App() {
                 <th>{posts.title}</th>
                 <th>{posts.content}</th>
                 <td>
-                  <button className="btn btn-warning btn-lg mx-3 my-3">
+                <ButtonGroup aria-label="Basic example">
+                  <button onClick={()=>setshowUpdatePost(posts)} className="btn btn-warning btn-lg  my-3">
                     Actualizar
                   </button>
-                  <button className="btn btn-danger btn-lg mx-3 my-3">
+                  <button className="btn btn-danger btn-lg  my-3">
                     Eliminar
                   </button>
+                  </ButtonGroup>
                 </td>
               </tr>
             ))}
@@ -103,4 +113,28 @@ export default function App() {
     alert(`Post creado correctamente "${createdPost.title}" todo bien`);
     getPosts();
   }
+
+  function onPostUpdate(updatePost){
+    setshowUpdatePost(null);
+    
+    if (updatePost === null){
+      return;
+    }
+
+    let postCopy =[...posts];
+
+    const index = postCopy.findIndex((postCopyPost,currentIndex)=>{
+      if (postCopyPost.id=== updatePost.id){
+        return true;
+      }
+    });
+
+    if(index!==-1){
+      postCopy[index]=updatePost;
+    }
+    setPosts(postCopy);
+    alert(`Post actualizado correctamente "${updatePost.title}" todo bien`)
+  }
+
 }
+

@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import contants from "./utilities/contants";
 import CreateForm from "./Components/createForm";
-import UpdateForm from "./Components/updateForm"
-import { ButtonGroup } from 'react-bootstrap';
-import './App.css';
+import UpdateForm from "./Components/updateForm";
+import { ButtonGroup } from "react-bootstrap";
+import "./App.css";
 
 export default function App() {
   const [posts, setPosts] = useState([]);
@@ -26,39 +26,61 @@ export default function App() {
       });
   }
 
+  function deletePost(id) {
+    const url = `${contants.API_DELETE_POSTS}/${id}`;
+
+    fetch(url, {
+      method: "DELETE",
+    })
+      .then((response) => response.json())
+      .then((responseFromserver) => {
+        console.log(responseFromserver);
+        onPostDelete(id);
+      })
+      .catch((error) => {
+        console.log(error);
+        alert(error);
+      });
+  }
+
   return (
     <div className="area">
-    <div className="container">
-      <div className="row min-vh-100">
-        <div className="col d-flex flex-column justify-content-center align-items-center">
-          {(showCreatePost === false && showUpdatePost === null) && (
-            <div>
-              <h1>Crud</h1>
-              <div className="mt-5">
-                <button
-                  onClick={getPosts}
-                  className="btn btn-primary btn-lg w-100"
-                >
-                  get
-                </button>
-                <button
-                  onClick={() => setshowCreatePost(true)}
-                  className="btn btn-success btn-lg w-100 mt-4"
-                >
-                  Crear nuevo post
-                </button>
+      <div className="container">
+        <div className="row min-vh-100">
+          <div className="col d-flex flex-column justify-content-center align-items-center">
+            {showCreatePost === false && showUpdatePost === null && (
+              <div>
+                <h1>Crud Basisco</h1>
+                <div className="mt-5">
+                  <button
+                    onClick={getPosts}
+                    className="btn btn-primary btn-lg w-100"
+                  >
+                    Obtener Datos
+                  </button>
+                  <button
+                    onClick={() => setshowCreatePost(true)}
+                    className="btn btn-success btn-lg w-100 mt-4"
+                  >
+                    Crear nuevo post
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {(posts.length > 0 && showCreatePost === false && showUpdatePost === null) && renderPostTble()}
+            {posts.length > 0 &&
+              showCreatePost === false &&
+              showUpdatePost === null &&
+              renderPostTble()}
 
-          {showCreatePost && < CreateForm onPostCreated={onPostCreated} />}
+            {showCreatePost && <CreateForm onPostCreated={onPostCreated} />}
 
-          {showUpdatePost !== null && <UpdateForm post={showUpdatePost} onPostUpdate={onPostUpdate}/>}
+            {showUpdatePost !== null && (
+              <UpdateForm post={showUpdatePost} onPostUpdate={onPostUpdate} />
+            )}
+          </div>
         </div>
       </div>
-    </div>
     </div>
   );
 
@@ -81,25 +103,47 @@ export default function App() {
                 <th>{posts.title}</th>
                 <th>{posts.content}</th>
                 <td>
-                <ButtonGroup aria-label="Basic example">
-                  <button onClick={()=>setshowUpdatePost(posts)} className="btn btn-warning btn-lg  my-3">
-                    Actualizar
-                  </button>
-                  <button className="btn btn-danger btn-lg  my-3">
-                    Eliminar
-                  </button>
+                  <ButtonGroup aria-label="Basic example">
+                    <button
+                      onClick={() => setshowUpdatePost(posts)}
+                      className="btn btn-warning btn-lg  my-3"
+                    >
+                      Actualizar
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            `Seguro quiere eliminar el post  "${posts.title}"?`
+                          )
+                        )
+                          deletePost(posts.id);
+                      }}
+                      className="btn btn-danger btn-lg  my-3"
+                    >
+                      Eliminar
+                    </button>
                   </ButtonGroup>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        <button
-          onClick={() => setPosts([])}
-          className="btn btn-success btn-lg w-100  "
-        >
-          Posts React
-        </button>
+        <div className="area">
+          <div className="container">
+            <div className="col d-flex flex-column justify-content-center align-items-center">
+              <button
+                onClick={() => setPosts([])}
+                className=" btn btn-secondary btn-lg w-100 "
+              >
+                Cerrar tabla
+              </button>
+            </div>
+          </div>
+        </div>
+        
+          <br></br>
+        
       </div>
     );
   }
@@ -114,27 +158,42 @@ export default function App() {
     getPosts();
   }
 
-  function onPostUpdate(updatePost){
+  function onPostUpdate(updatePost) {
     setshowUpdatePost(null);
-    
-    if (updatePost === null){
+
+    if (updatePost === null) {
       return;
     }
 
-    let postCopy =[...posts];
+    let postCopy = [...posts];
 
-    const index = postCopy.findIndex((postCopyPost,currentIndex)=>{
-      if (postCopyPost.id=== updatePost.id){
+    const index = postCopy.findIndex((postCopyPost, currentIndex) => {
+      if (postCopyPost.id === updatePost.id) {
         return true;
       }
     });
 
-    if(index!==-1){
-      postCopy[index]=updatePost;
+    if (index !== -1) {
+      postCopy[index] = updatePost;
     }
     setPosts(postCopy);
-    alert(`Post actualizado correctamente "${updatePost.title}" todo bien`)
+    alert(`Post actualizado correctamente "${updatePost.title}" todo bien`);
   }
 
-}
+  function onPostDelete(deletePost) {
+    let postCopy = [...posts];
 
+    const index = postCopy.findIndex((postCopyPost, currentIndex) => {
+      if (postCopyPost.id === deletePost) {
+        return true;
+      }
+    });
+
+    if (index !== -1) {
+      postCopy.splice(index, 1);
+    }
+    setPosts(postCopy);
+
+    alert(`El post  fue eliminado correctamente`);
+  }
+}

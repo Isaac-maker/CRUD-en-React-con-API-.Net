@@ -7,7 +7,7 @@ const endopoints ={
     get_post_id: 'get-all-posts-by-id',
     create_post:'create-post',
     update_post:'update-post',
-    delete_post:'delete-post'
+    delete_post:'delete-by-id'
 };
 
 const development={
